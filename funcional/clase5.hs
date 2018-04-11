@@ -22,3 +22,5 @@ type Saludo = String -> String
 
 ladrar :: Saludo
 ladrar nombre = "Guau " ++ nombre ++ " guau"
+
+-- para más información ver monstersInc.hs
