@@ -17,7 +17,7 @@ sexo :: Socio -> String
 sexo socio
     |(sexoP socio=='H')= "Hombre"
     |(sexoP socio=='M')= "Mujer"
-    |otherwise = ""
+    |(sexoP socio=='O')= "Otro"
 peso :: Socio -> Kilos
 peso socio = pesoP socio
 edad :: Socio -> Anios
@@ -76,7 +76,8 @@ socio solicitud = fst solicitud
 tratamiento :: Solicitud -> Tratamiento
 tratamiento solicitud = snd solicitud
 
--- 5)-- a-
+-- 5) Modelá las siguientes prestaciones: 
+-- a- prestacionTotal: cubre el 100% del costo de cualquier solicitud de tratamiento si es para una enfermedad dada, o nada en caso contrario
 type Prestacion = Solicitud -> Pesos
 prestacionTotal :: Prestacion
 prestacionTotal solicitud
@@ -85,7 +86,7 @@ prestacionTotal solicitud
     (socio solicitud)) = 
         costoBase (tratamiento solicitud)
     |otherwise = 0
--- b-
+-- b- prestacionSinPreexistencias:  cubre el 50% del costo de la solicitud, si el tratamiento es para una enfermedad de la que el socio NO tenga preexistencias, o nada en caso contrario
 prestacionSinPreexistencias :: Prestacion
 prestacionSinPreexistencias solicitud
     |not (tienePreexistencia 
@@ -93,11 +94,12 @@ prestacionSinPreexistencias solicitud
     (socio solicitud)) 
         = (costoBase (tratamiento solicitud)) / 2
     |otherwise = 0
--- c-
+-- c- prestacionHastaMaximo: cubre hasta $N pesos del costo para cualquier solicitud
 prestacionHastaMaximo :: Pesos -> Prestacion
 prestacionHastaMaximo pesos solicitud
     |(<=pesos) (costoBase (tratamiento solicitud)) = costoBase (tratamiento solicitud)
     |otherwise = pesos
+-- d- nada: no cubre nada de ninguna solicitud
 nada :: Prestacion
 nada _ = 0
 
