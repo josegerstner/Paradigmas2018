@@ -79,7 +79,7 @@ data Risa = Risa {
     intensidadRisa :: Int
 } deriving(Show, Eq)
 
-energiaRisa
+-- energiaRisa
 
 type Comediante = Ninio -> Risa
 capusotto :: Comediante
