@@ -5,18 +5,19 @@
 type Energia = Int
 data Grito = Grito {
     onomatopeya :: String,
-    intensidad :: Int,
+    intensidadGrito :: Int,
     mojoLaCama :: Bool
 }
+
 energia :: Grito -> Energia
 energia grito
-    | mojoLaCama grito = nivelDeTerror * (cuadradoIntensidad grito)
-    | otherwise = triple nivelDeTerror + intensidad grito
+    | mojoLaCama grito = nivelDeTerror * (cuadradoIntensidadGrito grito)
+    | otherwise = triple nivelDeTerror + intensidadGrito grito
     where
         nivelDeTerror = largo grito
 
 largo = length . onomatopeya
-cuadradoIntensidad = cuadrado intensidad
+cuadradoIntensidadGrito = cuadrado intensidadGrito
 cuadrado = (^2)
 triple = (3*)
 
@@ -33,7 +34,7 @@ type Mounstro = Ninio -> Grito
 randal :: Mounstro
 randal ninio = Grito {
     onomatopeya = "¡Mamadera!",
-    intensidad = contarVocalesDe ninio,
+    intensidadGrito = contarVocalesDe ninio,
     mojoLaCama = mideEntre 0.8 1.2 ninio
 }
 
@@ -49,7 +50,7 @@ entre min max n = elem [min..max]
 chuckNorris :: Mounstro
 chuckNorris = Grito {
     onomatopeya = ['a'..'z'],
-    intensidad = 1000,
+    intensidadGrito = 1000,
     mojoLaCama = True
 }
 
@@ -58,7 +59,36 @@ asustar ninio mounstro = mounstro ninio
 -- asustar = flip ($)
 
 type Equipo = [Mounstro]
-
+-- 3)
 asustarA :: Ninio -> Equipo -> [Grito]
 asustarA equipo ninio =
     map (asustar ninio) equipo
+
+-- 4)
+type Campamento = [Ninio]
+asustarATodos :: Equipo -> Campamento -> Energia
+asustarATodos equipo = 
+    calcularEnerigua . concat . map (\n -> asustarA n equipo)
+
+calcularEnerigua :: [Grito] -> Energia
+calcularEnerigua = sum . map energia
+
+-- 5)
+data Risa = Risa {
+    duracion :: Int,
+    intensidadRisa :: Int
+} deriving(Show, Eq)
+
+energiaRisa
+
+type Comediante = Ninio -> Risa
+capusotto :: Comediante
+capusotto ninio = Risa {
+    duracion = dobleDeLaEdad,
+    intensidadRisa = dobleDeLaEdad
+} where
+    dobleDeLaEdad = dobleEdad ninio
+
+dobleEdad ninio = 2 * edad ninio
+type Circo = [Comediante]
+hacerReirATodos :: Circo -> Energia
