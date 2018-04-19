@@ -96,9 +96,9 @@ prestacionSinPreexistencias solicitud
     |otherwise = 0
 -- c- prestacionHastaMaximo: cubre hasta $N pesos del costo para cualquier solicitud
 prestacionHastaMaximo :: Pesos -> Prestacion
-prestacionHastaMaximo pesos solicitud
-    |(<=pesos) (costoBase (tratamiento solicitud)) = costoBase (tratamiento solicitud)
-    |otherwise = pesos
+prestacionHastaMaximo tope solicitud
+    |(<=tope) (costoBase (tratamiento solicitud)) = costoBase (tratamiento solicitud)
+    |otherwise = tope
 -- d- nada: no cubre nada de ninguna solicitud
 nada :: Prestacion
 nada _ = 0
