@@ -37,19 +37,15 @@ data Tratamiento = Tratamiento {
 } deriving (Show, Eq)
 -------------------------------------------------------------------------
 -- PARTE A
--- 1)
-jose = Socio {sexoP='H', edadP=22, pesoP=78.9, preexistenciasP=["zamorreaDistopica"]}
-analia = Socio {sexoP='M', edadP=34, pesoP=70.0, preexistenciasP=[]} -- : es mujer, 34 años, 70Kg, y está sana
-x1 = Tratamiento {
-    enfermedad = "zamorreaDistopica", -- : es tratamiento para la "zamorreaDistopica" 
-    costoBase = 5000.0, -- sale $5000 
-    sesiones = 30 -- y requiere 30 sesiones
-}
-xfg23 = Tratamiento{
-    enfermedad = "zamorreaDistopica",
-    costoBase = 10000.0,
-    sesiones = 2
-} -- : otro tratamiento para la "zamorreaDistopica", pero sale $10000 y consta de 2 sesiones
+-- 1) Modelá a los socios y tratamientos y da ejemplos para las siguientes situaciones: 
+-- jose: es hombre, 22 años, 78.9Kg y tiene "zamorreaDistopica"
+-- analia: es mujer, 34 años, 70Kg, y está sana
+-- x1: es tratamiento para la "zamorreaDistopica" sale $5000 y requiere 30 sesiones
+-- xfg23: otro tratamiento para la "zamorreaDistopica", pero sale $10000 y consta de 2 sesiones
+jose = Socio {sexoP='H',edadP=22,pesoP=78.9,preexistenciasP=["zamorreaDistopica"]}
+analia = Socio {sexoP='M',edadP=34,pesoP=70,preexistenciasP=[]}
+x1 = Tratamiento {enfermedad="zamorreaDistopica",costoBase=5000,sesiones=30}
+xfg23 = Tratamiento{enfermedad="zamorreaDistopica",costoBase=10000,sesiones=2}
 
 -- 2) Poder diagnosticar una preexistencia a un socio.
 tienePreexistencia :: Preexistencia -> Socio -> Bool
@@ -70,7 +66,9 @@ estaEnfermo preexistencias = 8 < (length preexistencias)
 
 -------------------------------------------------------------------------
 -- PARTE B
--- 4)-- a-
+-- 4) Modelá las solicitudes y da el siguiente ejemplo: 
+-- solicitud897: jose solicitó el tratamiento x1
+-- a-
 type Solicitud = (Socio, Tratamiento)
 solicitud897 = (jose, x1)
 socio :: Solicitud -> Socio
@@ -87,8 +85,6 @@ prestacionTotal solicitud
     (socio solicitud)) = 
         costoBase (tratamiento solicitud)
     |otherwise = 0
--- : cubre el 100% del costo de cualquier solicitud de tratamiento si 
--- es para una enfermedad dada, o nada en caso contrario
 -- b-
 prestacionSinPreexistencias :: Prestacion
 prestacionSinPreexistencias solicitud
@@ -97,19 +93,18 @@ prestacionSinPreexistencias solicitud
     (socio solicitud)) 
         = (costoBase (tratamiento solicitud)) / 2
     |otherwise = 0
--- :  cubre el 50% del costo de la solicitud, 
--- si el tratamiento es para una enfermedad de la que el 
--- socio NO tenga preexistencias, o nada en caso contrario
 -- c-
 prestacionHastaMaximo :: Pesos -> Prestacion
 prestacionHastaMaximo pesos solicitud
     |(<=pesos) (costoBase (tratamiento solicitud)) = costoBase (tratamiento solicitud)
     |otherwise = pesos
--- : cubre hasta $N pesos del costo para cualquier solicitud
 nada :: Prestacion
 nada _ = 0
--- : no cubre nada de ninguna solicitud
 
 -- 6)-- a-
 -- Poder crear una prestación a partir de la suma de otras dos prestaciones.
+-- nuevaPrestacion :: Prestacion -> Prestacion -> Prestacion
+-- nuevaPrestacion prest1 prest2 solicitud
+--     |solicitud
 -- Poder crear un plan a partir de una lista de prestaciones.
+-- type Plan = [Prestacion]
