@@ -11,58 +11,116 @@ type Suerte = Int
 -- y una lista de factores que pueden ayudarles a ganar distintos juegos, 
 -- como ser su inteligencia, algún amuleto, etc.
 -- De cada factor tenemos un valor numérico que nos indica qué tan valioso es.
-type Inteligencia = Int
+type Paciencia = Int
 type ValorAmuleto = Int
 
 -- 1. Conocer la suerte total de una persona. Si no tiene un amuleto, es su suerte normal, 
 -- si tiene uno, su suerte se multiplica por el valor de ese amuleto.
 -- En general, sólo se considera que una persona tiene un factor si el valor del mismo es mayor a cero.
 -- Tener un amuleto de valor 0 es lo mismo que no tenerlo en absoluto.
-data Jugador = Jugador {
+data Jugador = CJugador {
     nombre :: String,
     dinero :: Dinero,
     suerte :: Suerte,
-    inteligencia :: Inteligencia,
+    paciencia :: Paciencia,
     amuleto :: ValorAmuleto
-} deriving(Show, Eq)
+}
+
+instance Show Jugador where
+    show = nombre
+
+instance Eq Jugador where
+    (==) unJugador otroJugador = nombre unJugador == nombre otroJugador
 
 haceApuesta :: Apuesta -> Jugador -> Jugador
-haceApuesta apuesta jugador = jugador {dinero=dinero jugador - apuesta}
+haceApuesta apuesta jugador
+    |apuesta < dinero jugador = jugador { dinero = dinero jugador - apuesta }
+    |otherwise = jugador
+
+tienePaciencia :: Jugador -> Bool
+tienePaciencia = mayorQue0.paciencia
 
 tieneAmuleto :: Jugador -> Bool
-tieneAmuleto jugador = amuleto jugador > 0
+tieneAmuleto = mayorQue0.amuleto
 
 suerteJugador :: Jugador -> Int
 suerteJugador jugador
     |tieneAmuleto jugador = amuleto jugador * suerte jugador
     |otherwise = suerte jugador
 
-
 -- 2. Desarrollar los juegos ruleta y maquinita sabiendo que 
 -- un juego se compone por un nombre, 
 -- un premio que determina cuánto dinero se ganaría a partir de un monto apostado
--- y una serie de criterios determinantes para ganar.
+-- y una serie de criterios determinantes para ganar. ???
 -- Para modelar el dinero usar el tipo Float.
-data Juego = Juego {
-    nombreJ :: Nombre,
-    premio :: Dinero
-}
+
 type Apuesta = Dinero
--- type Juego = Jugador -> Apuesta
+type Premio = Dinero
+type Condicion = Bool
+
+data Juego = CJuego {
+    nombreJ :: Nombre,
+    -- premio :: Premio,
+    condiciones :: [Condicion]
+}
+instance Show Juego where
+    show = nombreJ
+instance Eq Juego where
+    (==) unJuego otroJuego = nombreJ unJuego == nombreJ otroJuego
+
 -- a- La ruleta que se gana 37 veces lo apostado.
 -- Para ganar la persona debe tener una suerte total mayor a 80.
-ruleta = Juego {nombreJ="Ruleta",premio=0.0}
+ruleta :: Juego
+ruleta = CJuego {
+    nombreJ = "Ruleta",
+    -- premio = premioRuleta apuesta jugador,
+    condiciones = condicionesRuleta
+}
 
-ganaRuleta jugador = suerte jugador > 80
-premioRuleta apuesta = apuesta * 37
+condicionesRuleta :: [Condicion]
+condicionesRuleta = [(suerteJugadorMayorQue80)]
+
+premioRuleta :: Apuesta -> Jugador -> Premio
+premioRuleta apuesta jugador
+    |pasaCondicionesRuleta = apuesta * 37
+    |otherwise = 0.0
+
+pasaCondicionesRuleta :: Condicion
+pasaCondicionesRuleta = and condicionesRuleta
+
+suerteJugadorMayorQue80 :: Condicion
+suerteJugadorMayorQue80 = mayorQue80 suerte
 
 -- b- La maquinita que se basa en un jackpot y lo que se gana es la apuesta más el jackpot.
 -- Para ganar se deben cumplir dos condiciones: que la persona tenga una suerte total mayor a 95
 -- y además que tenga paciencia.
+type Jackpot = Float
+maquinita :: Juego
+maquinita = CJuego {
+    nombreJ = "Maquinita", 
+--    premio = ganaMaquinita jugador, 
+    condiciones = condicionesMaquinita
+}
+
+condicionesMaquinita :: [Condicion]
+condicionesMaquinita = [(suerteJugadorMayorQue95)]
+
+premioMaquinita :: Jackpot -> Apuesta -> Jugador -> Premio
+premioMaquinita jackpot apuesta jugador
+    |pasaCondicionesRuleta = apuesta + jackpot
+    |otherwise = 0.0
+
+pasaCondicionesMaquinita :: Bool
+pasaCondicionesMaquinita = and condicionesMaquinita
+
+
+suerteJugadorMayorQue95 :: Int -> Condicion
+suerteJugadorMayorQue95 jugador = mayorQue95 suerte
 
 -- 3. Saber si un jugador puede ganar un juego, lo cual sucede si
 -- cumple todas las condiciones para ganar ese juego.
-
+-- ganaJuego :: Juego -> Jugador -> Bool
+-- ganaJuego juego jugador = condiciones juego jugador
 -- 4. Dada una apuesta inicial, obtener la cantidad total de dinero que puede conseguir
 -- un jugador con ese monto si va a un casino.
 -- Cuando alguien va a un casino apuesta en cada juego lo conseguido en el juego anterior,
@@ -77,7 +135,16 @@ premioRuleta apuesta = apuesta * 37
 -- baje su saldo esa cantidad y luego juegue al juego. Si puede ganar en ese juego,
 -- la persona incrementa su saldo en lo que gana en el juego, de lo contrario no gana nada.
 
+-- Funciones genéricas
+mayorQue80 :: Num a => a -> Bool
+mayorQue80 = (> 80)
+
+mayorQue95 :: Num a => a -> Bool
+mayorQue95 = (> 95)
+
+mayorQue0 :: Num a => a -> Bool
+mayorQue0 = (> 0)
 
 -- VALORES PARA PRUEBAS
-pepe = Jugador {nombre="Pepe",dinero=300.00,suerte=81,inteligencia=100,amuleto=0}
-mara = Jugador {nombre="Mara",dinero=500.50,suerte=31,inteligencia=100,amuleto=2}
+pepe = CJugador "Pepe" 300.00  81 50  0
+mara = CJugador "Mara" 1500.50 50 100 2
