@@ -26,6 +26,15 @@ data Jugador = CJugador {
     amuleto :: ValorAmuleto
 }
 
+-- jugadorApuestaEnJuego :: Jugador -> Apuesta -> Juego -> Premio
+-- jugadorApuestaEnJuego jugador apuesta juego = cumpleCondiciones jugador apuesta juego
+
+-- cumpleCondiciones :: Juego -> Jugador -> Jugador
+-- cumpleCondiciones juego jugador = condiciones juego jugador
+
+
+
+
 instance Show Jugador where
     show = nombre
 
@@ -55,9 +64,10 @@ suerteJugador jugador
 -- Para modelar el dinero usar el tipo Float.
 
 type Apuesta = Dinero
-type Premio = Dinero
-type Condicion = Bool
+type Premio = Apuesta -> Dinero
+type Condicion = Jugador -> Bool
 
+-- type Juego = Jugador -> Apuesta -> Premio
 data Juego = CJuego {
     nombreJ :: Nombre,
     -- premio :: Premio,
@@ -74,19 +84,21 @@ ruleta :: Juego
 ruleta = CJuego {
     nombreJ = "Ruleta",
     -- premio = premioRuleta apuesta jugador,
-    condiciones = condicionesRuleta
+    condiciones = [suerteJugadorMayorQue80]
 }
 
-condicionesRuleta :: [Condicion]
-condicionesRuleta = [(suerteJugadorMayorQue80)]
+-- condicionesRuleta :: [Condicion]
+-- condicionesRuleta = [()]
 
 premioRuleta :: Apuesta -> Jugador -> Premio
 premioRuleta apuesta jugador
-    |pasaCondicionesRuleta = apuesta * 37
+    |pasaCondicionesRuleta jugador = apuesta * 37
     |otherwise = 0.0
 
-pasaCondicionesRuleta :: Condicion
-pasaCondicionesRuleta = and condicionesRuleta
+pasaCondicionesRuleta :: Condicion -> Bool
+pasaCondicionesRuleta jugador = and condicionesRuleta jugador
+
+seCumpleCondicionRuleta = map condicionRuleta jugador
 
 suerteJugadorMayorQue80 :: Condicion
 suerteJugadorMayorQue80 = mayorQue80 suerte
@@ -103,7 +115,7 @@ maquinita = CJuego {
 }
 
 condicionesMaquinita :: [Condicion]
-condicionesMaquinita = [(suerteJugadorMayorQue95)]
+condicionesMaquinita = [suerteJugadorMayorQue95, tienePaciencia]
 
 premioMaquinita :: Jackpot -> Apuesta -> Jugador -> Premio
 premioMaquinita jackpot apuesta jugador
