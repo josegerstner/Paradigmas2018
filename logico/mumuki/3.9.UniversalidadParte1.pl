@@ -16,7 +16,10 @@
 % Si no recordás qué predicados ya existían, revisá la biblioteca :wink:.
 
 
-
+bienUbicado(Persona) :- 
+  viveEn(Persona, Barrio),
+  forall(quiereIr(Persona, Lugar), 
+    quedaEn(Lugar, Barrio)).
 
 % Biblioteca:
 viveEn(mariano, avellaneda).
