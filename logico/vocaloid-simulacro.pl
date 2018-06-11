@@ -39,6 +39,11 @@ esAcelerado(Vocaloid) :-
 % concierto(Nombre, Pais, CantidadFama, TipoConcierto).
 concierto(MikuExpo, EEUU, 2000, gigante(6)).
 % gigante(DuracionCancion)
+% gigante del cual se sabe la duración maxima por canción. 
+% El cantante no puede saber canciones mas largas que dicho valor y, 
+% además, tiene que ser novedoso o acelerado.
+condicionGigante(Vocaloid) :-
+    
 
 % Miku Expo, es un concierto gigante que se va a realizar en Estados Unidos, 
 % le brinda 2000 de fama al vocaloid que pueda participar en él y el tiempo 

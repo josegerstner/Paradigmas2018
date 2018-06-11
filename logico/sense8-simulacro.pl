@@ -117,18 +117,9 @@ habilidad(wolfgang, delincuente(ladronDeJoyas)).
 
 habilidosa(Persona) :-
     habilidad(Persona, _),
-    forall(habilidad(Persona, Habilidad), esBuena(Habilidad)).
+    forall(habilidad(Persona, Habilidad), not(esMala(Habilidad))).
 
-esBuena(Habilidad) :-
-    habilidad(_, Habilidad),
-    noEsPolicia(Habilidad),
-    noEsDelincuente(Habilidad),
-    noEsConductorDeVehiculoChico(Habilidad).
-
-noEsPolicia(Habilidad) :-
-    Habilidad \= policia.
-noEsDelincuente(Habilidad) :-
-    Habilidad \= delincuente(_).
-noEsConductorDeVehiculoChico(Habilidad) :-
-    Habilidad \= conductor(_, CantPasajeros),
+esMala(policia).
+esMala(delincuente(_)).
+esMala(conductor(_, CantPasajeros)) :-
     CantPasajeros < 20.
