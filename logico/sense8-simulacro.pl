@@ -20,7 +20,7 @@ sensante(Sensante) :-
     grupoSensante(_, Sensante).
 
 conectadoCon(Persona, Madre) :-
-    grupoSensante(Madre, Sensante).
+    grupoSensante(Madre, Persona).
 conectadoCon(Persona, OtraPersona) :-
     grupoSensante(Madre, Persona),
     grupoSensante(Madre, OtraPersona).
@@ -30,7 +30,6 @@ conectadoCon(srWhispers, Miron) :-
 
 loVioALosOjos(jonas).
 loVioALosOjos(angelica).
-
 
 % -------------------------------------------------
 % Punto 2
@@ -54,14 +53,21 @@ leGusta(wolfgang, cancion(whatsUp)).
 
 parejaSensante(Persona1, Persona2) :-
     seGustanMutuamente(Persona1, Persona2),
+    pertenecenAlMismoGrupo(Persona1, Persona2).
 
 seGustanMutuamente(Persona1, Persona2) :-
-    leGusta(Persona1, Persona2),
-    leGusta(Persona2, Persona1).
+    leGusta(Persona1, persona(Persona2)),
+    leGusta(Persona2, persona(Persona1)),
+    Persona1 \= Persona2.
 
-sintonizador(Persona) :-
-    leGusta(Alguien),
-    grupoSensante(_, Alguien).
+pertenecenAlMismoGrupo(Persona1, Persona2) :-
+    grupoSensante(Madre, Persona1),
+    grupoSensante(Madre, Persona2),
+    Persona1 \= Persona2.
+
+sintonizador(Gusto) :-
+    leGusta(Persona, Gusto),
+    forall(pertenecenAlMismoGrupo(Persona, OtraPersona), leGusta(OtraPersona, Gusto)).
 
 % -------------------------------------------------
 % Punto 3
@@ -76,11 +82,14 @@ viveEn(lito, mexicoDF).
 viveEn(will, chicago).
 viveEn(wolfgang, berlin).
 
-disperso(Grupo) :-
-    forall(grupoSensante(Madre, Persona), )
-
-grupo(Grupo) :-
+disperso(grupo(Madre)) :-
+    grupoSensante(Madre, Persona),
+    viveEn(Persona, Lugar1),
+    forall(pertenecenAlMismoGrupo(Persona, OtraPersona), (viveEn(OtraPersona, Lugar2), Lugar1 \= Lugar2)).
     
+grupo(Madre) :-
+    grupoSensante(Madre, _),
+    forall(grupoSensante(_, Persona), grupoSensante(Madre, Persona)).
 
 vivenEnDistintasZonas(Persona, Alguien) :-
     viveEn(Persona, Zona1),
@@ -90,3 +99,36 @@ vivenEnDistintasZonas(Persona, Alguien) :-
 % -------------------------------------------------
 % Punto 4
 % -------------------------------------------------
+
+% habilidad(Persona, conductor(NombreDeVehículo,CantPasajeros)).
+habilidad(capheus, conductor(vanDamm, 25)).
+habilidad(sun, negocios).
+habilidad(sun, pelear).
+habilidad(sun, coser).
+habilidad(nomi, bloguera).
+habilidad(nomi, delincuente(hacker)).
+habilidad(kala, quimica).
+habilidad(riley, dj).
+habilidad(lito, actor).
+habilidad(will, policia).
+habilidad(wolfgang, inteligente).
+habilidad(wolfgang, pelear).
+habilidad(wolfgang, delincuente(ladronDeJoyas)).
+
+habilidosa(Persona) :-
+    habilidad(Persona, _),
+    forall(habilidad(Persona, Habilidad), esBuena(Habilidad)).
+
+esBuena(Habilidad) :-
+    habilidad(_, Habilidad),
+    noEsPolicia(Habilidad),
+    noEsDelincuente(Habilidad),
+    noEsConductorDeVehiculoChico(Habilidad).
+
+noEsPolicia(Habilidad) :-
+    Habilidad \= policia.
+noEsDelincuente(Habilidad) :-
+    Habilidad \= delincuente(_).
+noEsConductorDeVehiculoChico(Habilidad) :-
+    Habilidad \= conductor(_, CantPasajeros),
+    CantPasajeros < 20.
