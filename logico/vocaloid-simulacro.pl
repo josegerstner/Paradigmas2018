@@ -48,20 +48,42 @@ concierto(mikuExpo, estadosUnidos, 2000, gigante(6)).
 concierto(magicalMirai, japon, 3000, gigante(10)).
 concierto(vocalektVisions, estadosUnidos, 1000, mediano(novemberRain)).
 concierto(mikuFest, argentina, 100, pequenio(4)).
+concierto(Concierto) :-
+    concierto(Concierto, _, _, _).
+pais(Concierto, Pais) :-
+    concierto(Concierto, PaisConcierto, _, _),
+    Pais = PaisConcierto.
+fama(Concierto, Fama) :-
+    concierto(Concierto, _, FamaConcierto, _),
+    Fama = FamaConcierto.
+conciertoGigante(Concierto, Maximun) :-
+    concierto(Concierto,_,_,gigante(Maximo)),
+    Maximun = Maximo.
+conciertoMediano(Concierto, CancionPedida) :-
+    concierto(Concierto,_,_,mediano(Cancion)),
+    Cancion = CancionPedida.
+conciertoPequenio(Concierto, Minimum) :-
+    concierto(Concierto,_,_,pequenio(Minimo)),
+    Minimo = Minimum.
 
 % cumpleCondiciones(Vocaloid, Concierto)
-cumpleCondiciones(hatsuneMiku, concierto(_,_,_,_)).
-cumpleCondiciones(Vocaloid, concierto(_, _, _, gigante(Maximo))) :-
+cumpleCondiciones(hatsuneMiku, _).
+cumpleCondiciones(Vocaloid, Concierto) :-
+    concierto(Concierto),
     esNovedosoOAcelerado(Vocaloid),
-    forall(sabeCantar(Vocaloid, cancion(_, Duracion)), Duracion =< Maximo).
-cumpleCondiciones(Vocaloid, concierto(_, _, _, mediano(CancionPedida))) :-
+    conciertoGigante(Concierto, Maximo),
+    forall(sabeCantar(Vocaloid, cancion(_, Duracion)), 
+        Duracion =< Maximo).
+cumpleCondiciones(Vocaloid, Concierto) :-
+    concierto(Concierto),
     sabeCantar(Vocaloid, cancion(Cancion, _)),
+    conciertoMediano(Concierto, CancionPedida),
     Cancion == CancionPedida.
-cumpleCondiciones(Vocaloid, concierto(_, _, _, pequenio(Minimo))) :-
-    forall(sabeCantar(Vocaloid, cancion(_, Duracion)), Duracion >= Minimo).
-
-fama(concierto(_, _, FamaConcierto, _), Fama) :-
-    Fama = FamaConcierto.
+cumpleCondiciones(Vocaloid, Concierto) :-
+    concierto(Concierto),
+    conciertoPequenio(Concierto, Minimo),
+    forall(sabeCantar(Vocaloid, cancion(_, Duracion)), 
+        Duracion >= Minimo).
 
 % puedeParticipar(Vocaloid, Concierto).
 puedeParticipar(Vocaloid, Concierto) :-
@@ -69,25 +91,44 @@ puedeParticipar(Vocaloid, Concierto) :-
 
 % esMasFamoso(Vocaloid).
 esMasFamoso(Vocaloid) :-
-    vocaloid(Vocaloid).
+    vocaloid(Vocaloid),
+    maximoNivelDeFama(Vocaloid, NivelVocaloid),
+    forall(vocaloid(OtroVocaloid),
+        (maximoNivelDeFama(OtroVocaloid, NivelOtroVocaloid),
+        NivelVocaloid is max(NivelVocaloid, NivelOtroVocaloid))).
+
+maximoNivelDeFama(Vocaloid, Nivel) :-
+    nivelDeFama(Vocaloid, Nivel),
+    forall(nivelDeFama(Vocaloid, NivelVocaloid),
+        Nivel is max(Nivel, NivelVocaloid)).
 
 nivelDeFama(Vocaloid, Nivel) :-
-    puedeParticipar(Vocaloid, concierto(_,_,Fama,_)),
+    puedeParticipar(Vocaloid, Concierto),
+    fama(Concierto, Fama),
     atom_length(Vocaloid, LargoNombre),
     Nivel is Fama * LargoNombre.
-
 
 % conoce(Vocaloid, OtroVocaloid)
 conoce(megurineLuka, hatsuneMiku).
 conoce(megurineLuka, gumi).
 conoce(gumi, seeU).
 conoce(seeU, kaito).
-conoce(Vocaloid, OtroVocaloid) :-
-    conoce(OtroVocaloid, Vocaloid).
-conoce(Vocaloid, OtroVocaloid) :-
-    forall(conoce(Vocaloid, Alguien),
-    conoce(OtroVocaloid, Alguien)),
+conoce(Vocaloid, OtroVocaloid) :- conoce(OtroVocaloid, Vocaloid).
+
+seConocen(Vocaloid, OtroVocaloid) :-
+    conoce(OtroVocaloid, Vocaloid),
     Vocaloid \= OtroVocaloid.
+seConocen(Vocaloid, OtroVocaloid) :-
+    conoce(Vocaloid, OtroVocaloidDistinto),
+    seConocen(OtroVocaloidDistinto, OtroVocaloid).
+
+esElUnico(Vocaloid, Concierto) :-
+    vocaloid(Vocaloid),
+    puedeParticipar(Vocaloid, Concierto),
+    forall(conoce(Vocaloid, OtroVocaloid),
+        (not(puedeParticipar(OtroVocaloid, Concierto)),
+        Vocaloid \= OtroVocaloid)).
+
 
 % -----------------------------------------------------------------------
 % TESTS
@@ -121,37 +162,50 @@ test(seeU_no_es_acelerada, fail) :-
 
 :- begin_tests(cumpleCondiciones).
 test(miku_siempre_cumple_condiciones, nondet) :-
-    cumpleCondiciones(hatsuneMiku, concierto(mikuExpo, estadosUnidos, 2000, gigante(6))),
-    cumpleCondiciones(hatsuneMiku, concierto(magicalMirai, japon, 3000, gigante(10))),
-    cumpleCondiciones(hatsuneMiku, concierto(vocalektVisions, estadosUnidos, 1000, mediano(novemberRain))),
-    cumpleCondiciones(hatsuneMiku, concierto(mikuFest, argentina, 100, pequenio(4))).
-
+    cumpleCondiciones(hatsuneMiku, mikuExpo),
+    cumpleCondiciones(hatsuneMiku, magicalMirai),
+    cumpleCondiciones(hatsuneMiku, vocalektVisions),
+    cumpleCondiciones(hatsuneMiku, mikuFest).
 test(megurineLuka_no_cumple_condiciones_mikuExpo, fail) :-
-    cumpleCondiciones(megurineLuka, concierto(mikuExpo, estadosUnidos, 2000, gigante(6))).
+    cumpleCondiciones(megurineLuka, mikuExpo).
 test(megurineLuka_no_cumple_condiciones_magicalMirai, fail) :-
-    cumpleCondiciones(megurineLuka, concierto(magicalMirai, japon, 3000, gigante(10))).
+    cumpleCondiciones(megurineLuka, magicalMirai).
 test(megurineLuka_no_cumple_condiciones_vocalektVisions, fail) :-
-    cumpleCondiciones(megurineLuka, concierto(vocalektVisions, estadosUnidos, 1000, mediano(novemberRain))).
+    cumpleCondiciones(megurineLuka, vocalektVisions).
 test(megurineLuka_cumple_condiciones_mikuFest) :-
-    cumpleCondiciones(megurineLuka, concierto(mikuFest, argentina, 100, pequenio(4))).
-
+    cumpleCondiciones(megurineLuka, mikuFest).
 test(gumi_no_cumple_condiciones_mikuExpo, fail) :-
-    cumpleCondiciones(gumi, concierto(mikuExpo, estadosUnidos, 2000, gigante(6))).
+    cumpleCondiciones(gumi, mikuExpo).
 test(gumi_no_cumple_condiciones_magicalMirai, fail) :-
-    cumpleCondiciones(gumi, concierto(magicalMirai, japon, 3000, gigante(10))).
+    cumpleCondiciones(gumi, magicalMirai).
 test(gumi_no_cumple_condiciones_vocalektVisions, fail) :-
-    cumpleCondiciones(gumi, concierto(vocalektVisions, estadosUnidos, 1000, mediano(novemberRain))).
+    cumpleCondiciones(gumi, vocalektVisions).
 test(gumi_cumple_condiciones_mikuFest) :-
-    cumpleCondiciones(gumi, concierto(mikuFest, argentina, 100, pequenio(4))).
-
+    cumpleCondiciones(gumi, mikuFest).
 test(seeU_cumple_condiciones_mikuExpo, nondet) :-
-    cumpleCondiciones(seeU, concierto(mikuExpo, estadosUnidos, 2000, gigante(6))).
+    cumpleCondiciones(seeU, mikuExpo).
 test(seeU_cumple_condiciones_magicalMirai, nondet) :-
-    cumpleCondiciones(seeU, concierto(magicalMirai, japon, 3000, gigante(10))).
+    cumpleCondiciones(seeU, magicalMirai).
 test(seeU_cumple_condiciones_vocalektVisions, nondet) :-
-    cumpleCondiciones(seeU, concierto(vocalektVisions, estadosUnidos, 1000, mediano(novemberRain))).
+    cumpleCondiciones(seeU, vocalektVisions).
 test(seeU_cumple_condiciones_mikuFest) :-
-    cumpleCondiciones(seeU, concierto(mikuFest, argentina, 100, pequenio(4))).
+    cumpleCondiciones(seeU, mikuFest).
 :- end_tests(cumpleCondiciones).
+
+:- begin_tests(nivelDeFama).
+test(megurineLuka_tiene_nivel_de_fama_1200, true(Nivel == 1200)) :-
+    nivelDeFama(megurineLuka, Nivel).
+test(hatsuneMiku_tiene_los_siguientes_niveles_de_fama, set(Nivel = [22000, 33000, 11000, 1100])) :-
+    nivelDeFama(hatsuneMiku, Nivel).
+test(gumi_tiene_nivel_de_fama_400, true(Nivel == 400)) :-
+    nivelDeFama(gumi, Nivel).
+test(seeU_tiene_los_siguientes_niveles_de_fama, set(Nivel = [8000, 12000, 4000, 400])) :-
+    nivelDeFama(seeU, Nivel).
+:- end_tests(nivelDeFama).
+
+:- begin_tests(esMasFamoso).
+test(miku_es_la_mas_famosa, true(Vocaloid == hatsuneMiku), nondet) :-
+    esMasFamoso(Vocaloid).
+:- end_tests(esMasFamoso).
 
 % Bonus: https://www.youtube.com/watch?v=n5n7CSGPzqw
