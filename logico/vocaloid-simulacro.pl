@@ -113,11 +113,11 @@ conoce(megurineLuka, hatsuneMiku).
 conoce(megurineLuka, gumi).
 conoce(gumi, seeU).
 conoce(seeU, kaito).
-conoce(Vocaloid, OtroVocaloid) :- conoce(OtroVocaloid, Vocaloid).
 
 seConocen(Vocaloid, OtroVocaloid) :-
-    conoce(OtroVocaloid, Vocaloid),
-    Vocaloid \= OtroVocaloid.
+    conoce(Vocaloid, OtroVocaloid).
+seConocen(Vocaloid, OtroVocaloid) :-
+    conoce(OtroVocaloid, Vocaloid).
 seConocen(Vocaloid, OtroVocaloid) :-
     conoce(Vocaloid, OtroVocaloidDistinto),
     seConocen(OtroVocaloidDistinto, OtroVocaloid).
@@ -125,7 +125,7 @@ seConocen(Vocaloid, OtroVocaloid) :-
 esElUnico(Vocaloid, Concierto) :-
     vocaloid(Vocaloid),
     puedeParticipar(Vocaloid, Concierto),
-    forall(conoce(Vocaloid, OtroVocaloid),
+    forall(seConocen(Vocaloid, OtroVocaloid),
         (not(puedeParticipar(OtroVocaloid, Concierto)),
         Vocaloid \= OtroVocaloid)).
 
