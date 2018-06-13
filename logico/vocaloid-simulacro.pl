@@ -114,13 +114,16 @@ conoce(megurineLuka, gumi).
 conoce(gumi, seeU).
 conoce(seeU, kaito).
 
-seConocen(Vocaloid, OtroVocaloid) :-
+sonConocidos(Vocaloid, OtroVocaloid) :-
     conoce(Vocaloid, OtroVocaloid).
-seConocen(Vocaloid, OtroVocaloid) :-
+sonConocidos(Vocaloid, OtroVocaloid) :-
     conoce(OtroVocaloid, Vocaloid).
+
 seConocen(Vocaloid, OtroVocaloid) :-
-    conoce(Vocaloid, OtroVocaloidDistinto),
-    seConocen(OtroVocaloidDistinto, OtroVocaloid).
+    sonConocidos(Vocaloid, OtroVocaloid).
+seConocen(Vocaloid, OtroVocaloid) :-
+    seConocen(Vocaloid, OtroVocaloidDistinto),
+    sonConocidos(OtroVocaloidDistinto, OtroVocaloid).
 
 esElUnico(Vocaloid, Concierto) :-
     vocaloid(Vocaloid),
