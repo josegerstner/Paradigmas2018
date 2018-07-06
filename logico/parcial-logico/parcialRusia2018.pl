@@ -64,6 +64,18 @@ test(mascherano_es_defensor,
 
 tieneJugadorEstrella(Pais, Jugador) :-
     lleva(Pais, Jugador),
+    jugador(Jugador, Posicion),
+    esBuenaPosicion(Posicion).
+
+esBuenaPosicion(arquero(CantidadPenalesAtajados)) :-
+    CantidadPenalesAtajados >= 3.
+
+% -------------------------------------------------------------
+% PUNTO 2
+% -------------------------------------------------------------
+
+tieneJugadorEstrella(Pais, Jugador) :-
+    lleva(Pais, Jugador),
     esJugadorEstrella(Jugador).
 
 esJugadorEstrella(Jugador) :-
